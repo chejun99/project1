@@ -18,21 +18,27 @@ cur=conn.cursor()
 
 sql="insert into project(sign,time) values (%s,%s)"
 
-while True:
-    s = ser.readline()[:-2]
+try:
 
-    print(int(s)+1)
+    while True:
+        s = ser.readline()[:-2]
 
-    time.sleep(0.9)
-#----------------------------------------------------------
-    st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+        print(s)
 
-    container=[s,st]
+        time.sleep(0.9)
+    #----------------------------------------------------------
+        st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-    cur.execute(sql, container)
+        container=[s,st]
 
-    conn.commit()
+        if len(s)>0:
+            cur.execute(sql, container)
 
-    print(container)
+            conn.commit()
 
-    print("commit")
+            print("commit")
+
+finally:
+    cur.close()
+    conn.close()
+    print("error")
