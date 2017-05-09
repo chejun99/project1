@@ -1,4 +1,6 @@
 #-*- coding: utf-8 -*-
+import random
+import io
 import picamera
 import picamera.array
 import datetime
@@ -10,8 +12,8 @@ from fractions import Fraction
 
 prior_image = None
 threshold = 20  # How Much pixel changes
-height = 820
-width = 616
+height = 1280
+width = 720
 sensitivity = height*width*0.1  # How many pixels change
 
 
@@ -21,27 +23,31 @@ def detect_motion(camera, width, height):
     camera.capture(stream, format='jpeg', use_video_port=True)
     stream.seek(0)
     if prior_image is None:
-        prior_image = Image.open(stream)
+        prior_image = Image.open(stream).load()
         return False
     else:
-        current_image = Image.open(stream)
-        # result = random.randint(0, 10) == 0
+        current_image = Image.open(stream).load()
         result = scanMotion(width, height, current_image, prior_image)
         prior_image = current_image
         return result
 
 def scanMotion(width, height, current_image, prior_image):
+    print("scanMotion initiated")
     global sensitivity
     motionFound = False
     data1 = prior_image
     while not motionFound:
+        print("while not motionFound")
         data2 = current_image
         diffCount = 0L
         for w in range(0, width):
             for h in range(0, height):
                 # get the diff of the pixel. Conversion to int
                 # is required to avoid unsigned short overflow.
-                diff = abs(int(data1[h][w][1]) - int(data2[h][w][1]))
+                # print (data1)
+                # print(data1[h][w])
+                # print(data1[h][w][0])
+                diff = abs(int(data1[h, w][1]) - int(data2[h, w][1]))
                 if  diff > threshold:
                     diffCount += 1
             if diffCount > sensitivity:
@@ -50,6 +56,9 @@ def scanMotion(width, height, current_image, prior_image):
             motionFound = True
         else:
             data2 = data1
+        print ("diffCount : ",diffCount)
+        motionFound = random.randrange(0,5) == 0
+    print("returning scanMotion")
     return motionFound
 #
 #
@@ -84,11 +93,12 @@ with picamera.PiCamera() as camera:
     try:
         while True:
             camera.wait_recording(1)
+            print("calling detect_motion in main loop:")
             if detect_motion(camera, width, height):
                 print('Motion detected!')
                 camera.split_recording('after.h264')
                 write_video(stream)
-                while detect_motion(camera):
+                while detect_motion(camera, width, height):
                     camera.wait_recording(3)
                 print('Motion stopped!')
                 camera.split_recording(stream)
