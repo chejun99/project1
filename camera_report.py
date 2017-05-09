@@ -3,8 +3,7 @@ import random
 import io
 import picamera
 import picamera.array
-import datetime
-import time
+from time import localtime, strftime
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
@@ -46,6 +45,7 @@ def scanMotion(width, height, current_image, prior_image):
             motionFound = True
             break
     print ("diffCount : ",diffCount)
+    motionFound = random.randrange(0,2) == 0
     return motionFound
 #
 #
@@ -60,7 +60,7 @@ def scanMotion(width, height, current_image, prior_image):
 #             return stream.array
 
 def write_video(stream):
-    with io.open('before',strftime("%Y-%M-%D %h-%m-%s",localtime()),'.h264', 'wb') as output:
+    with io.open('before' + strftime("%Y-%m-%d %H-%M-%S",localtime()) + '.h264', 'wb') as output:
         for frame in stream.frames:
             if frame.header:
                 stream.seek(frame.position)
@@ -83,7 +83,7 @@ with picamera.PiCamera() as camera:
             print("calling detect_motion in main loop:")
             if detect_motion(camera, width, height):
                 print('Motion detected!')
-                camera.split_recording('after',strftime("%Y-%M-%D %h-%m-%s",localtime()),'.h264')
+                camera.split_recording('after' + strftime("%Y-%m-%d %H-%M-%S",localtime()) + '.h264')
                 write_video(stream)
                 while detect_motion(camera, width, height):
                     camera.wait_recording(3)
