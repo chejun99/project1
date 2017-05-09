@@ -60,7 +60,7 @@ def scanMotion(width, height, current_image, prior_image):
 #             return stream.array
 
 def write_video(stream):
-    with io.open('before.h264', 'wb') as output:
+    with io.open('before',strftime("%Y-%M-%D %h-%m-%s",localtime()),'.h264', 'wb') as output:
         for frame in stream.frames:
             if frame.header:
                 stream.seek(frame.position)
@@ -83,7 +83,7 @@ with picamera.PiCamera() as camera:
             print("calling detect_motion in main loop:")
             if detect_motion(camera, width, height):
                 print('Motion detected!')
-                camera.split_recording('after.h264')
+                camera.split_recording('after',strftime("%Y-%M-%D %h-%m-%s",localtime()),'.h264')
                 write_video(stream)
                 while detect_motion(camera, width, height):
                     camera.wait_recording(3)
@@ -91,3 +91,4 @@ with picamera.PiCamera() as camera:
                 camera.split_recording(stream)
     finally:
         camera.stop_recording()
+        #aa
