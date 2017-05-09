@@ -33,32 +33,19 @@ def detect_motion(camera, width, height):
 
 def scanMotion(width, height, current_image, prior_image):
     print("scanMotion initiated")
+    global threshold
     global sensitivity
     motionFound = False
-    data1 = prior_image
-    while not motionFound:
-        print("while not motionFound")
-        data2 = current_image
-        diffCount = 0L
-        for w in range(0, width):
-            for h in range(0, height):
-                # get the diff of the pixel. Conversion to int
-                # is required to avoid unsigned short overflow.
-                # print (data1)
-                # print(data1[h][w])
-                # print(data1[h][w][0])
-                diff = abs(int(data1[h, w][1]) - int(data2[h, w][1]))
-                if  diff > threshold:
-                    diffCount += 1
-            if diffCount > sensitivity:
-                break; #break outer loop.
+    diffCount = 0L
+    for w in range(0, width):
+        for h in range(0, height):
+            diff = abs(int(prior_image[h, w][1]) - int(current_image[h, w][1]))
+            if  diff > threshold:
+                diffCount += 1
         if diffCount > sensitivity:
             motionFound = True
-        else:
-            data2 = data1
-        print ("diffCount : ",diffCount)
-        motionFound = random.randrange(0,5) == 0
-    print("returning scanMotion")
+            break
+    print ("diffCount : ",diffCount)
     return motionFound
 #
 #
